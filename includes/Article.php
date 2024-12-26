@@ -1,185 +1,229 @@
 <?php
+declare(strict_types=1);
+
+namespace MediaWiki\Extension\GoogleRichCards;
+
+use DateTime;
+use MediaWiki\MediaWikiServices;
+use OutputPage;
+use RequestContext;
+use Title;
+use MediaWiki\Revision\RevisionRecord;
+
 /**
  * GoogleRichCards
  * Google Rich Cards metadata generator for Articles
  *
- * PHP version 5.4
+ * PHP version 8.1
  *
- * @category Extension
  * @package  GoogleRichCards
- * @author   Igor Shishkin <me@teran.ru>
+ * @author   Igor Shishkin <me@teran.ru>, Drolerina
  * @license  GPL http://www.gnu.org/licenses/gpl.html
- * @link     https://github.com/teran/mediawiki-GoogleRichCards
  */
-
-namespace MediaWiki\Extension\GoogleRichCards;
-
-use OutputPage;
-use Title;
-
-if (!defined('MEDIAWIKI')) {
-  echo("This is a Mediawiki extension and doesn't provide standalone functionality\n");
-  die(1);
-}
-
 class Article {
-  /**
-   * @var static Article instance to use for Singleton pattern
-   */
-  private static $instance;
+    /**
+     * @var self|null Singleton instance
+     */
+    private static ?self $instance = null;
 
-  /**
-   * @var Title current instance of Title received from global $wgTitle
-   */
-  private $title;
+    /**
+     * @var string Site name (was $wgSitename)
+     */
+    private string $sitename;
 
-  /**
-   * @var string Site name received from global $wgSitename
-   */
-  private $sitename;
+    /**
+     * @var string Server URL (was $wgServer)
+     */
+    private string $server;
 
-  /**
-   * @var string Server URL received from global $wgServer
-   */
-  private $server;
+    /**
+     * @var string Path to logo (was $wgLogo)
+     */
+    private string $logo;
 
-  /**
-   * @var string Wiki logo path received from global $wgLogo
-   */
-  private $logo;
+    /**
+     * @var Title|null The current Title object
+     */
+    private ?Title $title = null;
 
-  /**
-   * Singleon pattern getter
-   *
-   * @return Article
-   */
-  public static function getInstance() {
-    if(!isset(self::$instance)) {
-      self::$instance = new Article();
+    /**
+     * Private constructor (Singleton pattern)
+     */
+    private function __construct() {
+        // Retrieve config from MediaWikiServices
+        $config = MediaWikiServices::getInstance()->getMainConfig();
+
+        // Adjust these if your local config uses different names
+        $this->sitename = (string) $config->get( 'Sitename' );
+        $this->server   = (string) $config->get( 'Server' );
+        $this->logo     = (string) $config->get( 'Logo' );
+
+        // Grab the current Title from the RequestContext
+        $this->title = RequestContext::getMain()->getTitle();
     }
 
-    return self::$instance;
-  }
-
-  /**
-   * Class constructor
-   */
-  public function __construct() {
-    global $wgLogo, $wgServer, $wgSitename, $wgTitle;
-
-    $this->title = $wgTitle;
-    $this->sitename = $wgSitename;
-    $this->server = $wgServer;
-    $this->logo = $wgLogo;
-  }
-
-  /**
-   * Return creation time or 0 from current Article
-   *
-   * @return int
-   */
-  public function getCTime() {
-    $ctime = \DateTime::createFromFormat('YmdHis', $this->title->getEarliestRevTime());
-    if($ctime) {
-      return $ctime->format('c');
-    }
-    return 0;
-  }
-
-  /**
-   * Return modification time or 0 from current Article
-   *
-   * @return int
-   */
-  public function getMTime() {
-    $mtime = \DateTime::createFromFormat('YmdHis', $this->title->getTouched());
-    if($mtime) {
-      return $mtime->format('c');
-    }
-    return 0;
-  }
-
-  /**
-   * Return first image and it' resolution from the current Article
-   *
-   * @param OutputPage OutputPage instance referencce
-   * @return array
-   */
-  public function getIllustration(OutputPage &$out) {
-    $image = key($out->getFileSearchOptions());
-    if($image && $image_object = wfFindFile($image)) {
-      $image_url = $image_object->getFullURL();
-      $image_width = $image_object->getWidth();
-      $image_height = $image_object->getHeight();
-    } else {
-      $image_url = $this->server.$this->logo; // Mediawiki logo to be used by default
-      $image_width = 135; // Default max logo width
-      $image_height = 135; // Default max logo height
+    /**
+     * Singleton accessor
+     *
+     * @return self
+     */
+    public static function getInstance(): self {
+        if ( self::$instance === null ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
-    return array($image_url, $image_width, $image_height);
-  }
+    /**
+     * Return page creation time (in ISO 8601) or "0"
+     *
+     * @return string
+     */
+    private function getCreationTime(): string {
+        if ( !$this->title ) {
+            return '0';
+        }
+        // Use RevisionLookup to get the first revision
+        $revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+        $firstRevision = $revisionLookup->getFirstRevision(
+            $this->title->toPageIdentity()
+        );
 
-  /**
-   * Render head item with metadata for Google Rich Snippet
-   *
-   * @param OutputPage OutputPage instance referencce
-   */
-  function render(OutputPage &$out) {
-    if($this->title instanceof Title && $this->title->isContentPage()) {
-      $mtime = $this->getMtime();
-
-      $created_timestamp = $this->getCTime();
-      $modified_timestamp = $this->getMTime();
-
-      $first_revision = $this->title->getFirstRevision();
-      if($first_revision) {
-        $author = $first_revision->getUserText();
-      } else {
-        $author = 'None';
-      }
-
-      $image = $this->getIllustration($out);
-
-      $article = array(
-        '@context'         => 'http://schema.org',
-        '@type'            => 'Article',
-        'mainEntityOfPage' => array(
-          '@type' => 'WebPage',
-          '@id'   => $this->title->getFullURL(),
-        ),
-        'author'           => array(
-          '@type' => 'Person',
-          'name'  => $author,
-        ),
-        'headline'         => $this->title->getText(),
-        'dateCreated'      => $created_timestamp,
-        'datePublished'    => $created_timestamp,
-        'dateModified'     => $modified_timestamp,
-        'discussionUrl'    => $this->server.'/'.$this->title->getTalkPage(),
-        'image'            => array(
-          '@type'  => 'ImageObject',
-          'url'    => $image[0],
-          'height' => $image[2],
-          'width'  => $image[1],
-        ),
-        'publisher'        => array(
-          '@type' => 'Organization',
-          'name'  => $this->sitename,
-          'logo'  => array(
-            '@type' => 'ImageObject',
-            'url'   => $this->server.$this->logo,
-          ),
-        ),
-        'description'      => $this->title->getText(),
-      );
-
-      $out->addHeadItem(
-        'GoogleRichCardsArticle',
-        '<script type="application/ld+json">'.json_encode($article).'</script>'
-      );
+        if ( $firstRevision instanceof RevisionRecord ) {
+            $timestamp = $firstRevision->getTimestamp(); // 'YYYYMMDDHHMMSS'
+            $dt = DateTime::createFromFormat( 'YmdHis', $timestamp );
+            if ( $dt ) {
+                return $dt->format( 'c' ); // e.g. "2023-01-01T12:34:56+00:00"
+            }
+        }
+        return '0';
     }
-  }
+
+    /**
+     * Return page modification time (in ISO 8601) or "0"
+     *
+     * @return string
+     */
+    private function getModificationTime(): string {
+        if ( !$this->title ) {
+            return '0';
+        }
+        // Use RevisionLookup to get the *latest* revision as "modified" time
+        $revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+        $latestRevision = $revisionLookup->getRevisionByTitle( $this->title );
+
+        if ( $latestRevision instanceof RevisionRecord ) {
+            $timestamp = $latestRevision->getTimestamp(); // 'YYYYMMDDHHMMSS'
+            $dt = DateTime::createFromFormat( 'YmdHis', $timestamp );
+            if ( $dt ) {
+                return $dt->format( 'c' );
+            }
+        }
+        return '0';
+    }
+
+    /**
+     * Return first image (and its resolution) from the current page
+     * Fallback to the site logo if no image found
+     *
+     * @param OutputPage $out The OutputPage instance.
+     * @return array [string $imageUrl, int $width, int $height]
+     */
+    public function getIllustration( OutputPage $out ): array {
+        $repoGroup = MediaWikiServices::getInstance()->getRepoGroup();
+        $imageSearchOptions = $out->getFileSearchOptions();
+        $image = key( $imageSearchOptions );
+
+        if ( $image ) {
+            $file = $repoGroup->findFile( $image );
+            if ( $file ) {
+                return [
+                    $file->getFullURL(),
+                    $file->getWidth() ?? 0,
+                    $file->getHeight() ?? 0
+                ];
+            }
+        }
+
+        // Fallback: use site logo if no suitable file found
+        return [
+            $this->server . $this->logo,
+            135, // default width
+            135  // default height
+        ];
+    }
+
+    /**
+     * Render <script type="application/ld+json"> with Article metadata
+     *
+     * @param OutputPage $out The OutputPage instance.
+     * @return void
+     */
+    public function render( OutputPage $out ): void {
+        if ( !$this->title || !$this->title->isContentPage() ) {
+            return;
+        }
+
+        // Acquire creation & modification timestamps
+        $createdTimestamp  = $this->getCreationTime();
+        $modifiedTimestamp = $this->getModificationTime();
+
+        // Use RevisionLookup to get the author of the first revision
+        $revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+        $firstRevision = $revisionLookup->getFirstRevision(
+            $this->title->toPageIdentity()
+        );
+
+        if ( $firstRevision instanceof RevisionRecord ) {
+            $authorName = $firstRevision->getUserIdentity()->getName();
+        } else {
+            $authorName = 'None';
+        }
+
+        // Find any images or fall back to logo
+        [ $imageUrl, $imgWidth, $imgHeight ] = $this->getIllustration( $out );
+
+        // Build an array describing the article in Schema.org/JSON-LD
+        $article = [
+            '@context'         => 'http://schema.org',
+            '@type'            => 'Article',
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id'   => $this->title->getFullURL(),
+            ],
+            'author' => [
+                '@type' => 'Person',
+                'name'  => $authorName,
+            ],
+            'headline'         => $this->title->getText(),
+            'dateCreated'      => $createdTimestamp,
+            'datePublished'    => $createdTimestamp,
+            'dateModified'     => $modifiedTimestamp,
+            'discussionUrl'    => $this->title->getTalkPage()
+                ? $this->title->getTalkPage()->getFullURL()
+                : '',
+            'image' => [
+                '@type'  => 'ImageObject',
+                'url'    => $imageUrl,
+                'width'  => $imgWidth,
+                'height' => $imgHeight,
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name'  => $this->sitename,
+                'logo'  => [
+                    '@type' => 'ImageObject',
+                    'url'   => $this->server . $this->logo,
+                ],
+            ],
+            // Using the same text for "description" and "headline" as a fallback.
+            'description' => $this->title->getText(),
+        ];
+
+        // Inject JSON-LD into <head>
+        $out->addHeadItem(
+            'GoogleRichCardsArticle',
+            '<script type="application/ld+json">' . json_encode( $article ) . '</script>'
+        );
+    }
 }
-
-?>

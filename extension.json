@@ -1,6 +1,6 @@
 {
 	"name": "GoogleRichCards",
-	"version": "0.1",
+	"version": "0.2",
 	"author": [
 		"Igor Shishkin",
 		"Drolerina"
@@ -11,10 +11,27 @@
 	"type": "parserhook",
 	"MessagesDirs": {},
 	"requires": {
-		"MediaWiki": ">= 1.29.0"
+		"MediaWiki": ">= 1.39.0"
 	},
 	"AutoLoadNamespaces": {
 		"MediaWiki\\Extension\\GoogleRichCards\\": "includes/"
+	},
+	"config": {
+		"wgGoogleRichCardsAnnotateArticles": {
+			"value": true,
+			"description": "Add support for Google Rich Cards to articles",
+			"public": true
+		},
+		"wgGoogleRichCardsAnnotateEvents": {
+			"value": false,
+			"description": "Add support for Google Rich Cards to events",
+			"public": true
+		},
+		"wgGoogleRichCardsAnnotateWebSite": {
+			"value": false,
+			"description": "Add support for Google Rich Cards to website",
+			"public": true
+		}
 	},
 	"Hooks": {
 		"BeforePageDisplay": "MediaWiki\\Extension\\GoogleRichCards\\Hooks::onBeforePageDisplay",
