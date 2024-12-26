@@ -5,9 +5,9 @@
 		"Igor Shishkin",
 		"Drolerina"
 	],
-	"url": "https://github.com/teran/mediawiki-GoogleRichCards",
+	"url": "https://github.com/arnomaris/mediawiki-extensions-GoogleRichCards",
 	"description": "Google Rich Cards extension",
-	"license-name": "GPL",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"MessagesDirs": {},
 	"requires": {
@@ -16,6 +16,7 @@
 	"AutoLoadNamespaces": {
 		"MediaWiki\\Extension\\GoogleRichCards\\": "includes/"
 	},
+	"config_prefix": "wg",
 	"config": {
 		"wgGoogleRichCardsAnnotateArticles": {
 			"value": true,
@@ -23,8 +24,13 @@
 			"public": true
 		}
 	},
+	"HookHandlers": {
+		"GoogleRichCardsHooks": {
+			"class": "MediaWiki\\Extension\\GoogleRichCards\\Hooks"
+		}
+	},
 	"Hooks": {
-		"BeforePageDisplay": "MediaWiki\\Extension\\GoogleRichCards\\Hooks::onBeforePageDisplay"
+		"BeforePageDisplay": "GoogleRichCardsHooks"
 	},
 	"manifest_version": 2
 }

@@ -18,7 +18,6 @@ use Skin;
  * @package  GoogleRichCards
  * @author   Igor Shishkin <me@teran.ru>, Drolerina
  * @license  GPL http://www.gnu.org/licenses/gpl.html
- * @link     https://github.com/arnomaris/mediawiki-googlerichcards
  */
 class Hooks {
 
@@ -72,5 +71,5 @@ class Hooks {
 //           $parser->setHook( 'event', [ $event, 'parse' ] );
 //       }
 //   }
-// }
+}
 
