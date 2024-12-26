@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MediaWiki\Extension\GoogleRichCards;
 
 use DateTime;
+use Html;
 use MediaWiki\MediaWikiServices;
 use OutputPage;
 use RequestContext;
@@ -219,12 +220,15 @@ class Article {
             'description' => $this->title->getText(),
         ];
 
+        $jsonLd = Html::rawElement(
+            'script',
+            [ 'type' => 'application/ld+json' ],
+            json_encode( $article, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )
+        );
+
         wfDebugLog( 'GoogleRichCards', 'Injecting json' . $this->title->getText() );
 
         // Inject JSON-LD into <head>
-        $out->addHeadItem(
-            'GoogleRichCardsArticle',
-            '<script type="application/ld+json">' . json_encode( $article ) . '</script>'
-        );
+        $out->addHeadItem( 'GoogleRichCardsArticle', $jsonLd );
     }
 }
