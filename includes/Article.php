@@ -176,7 +176,12 @@ class Article {
         );
 
         if ( $firstRevision instanceof RevisionRecord ) {
-            $authorName = $firstRevision->getUserIdentity()->getName();
+            if ( method_exists( $firstRevision, 'getUserIdentity' ) ) {
+                $authorIdentity = $firstRevision->getUserIdentity();
+                $authorName     = $authorIdentity->getName();
+            } else {
+                $authorName = $firstRevision->getUser()->getName();
+            }
         } else {
             $authorName = 'None';
         }
