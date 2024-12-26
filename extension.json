@@ -21,21 +21,10 @@
 			"value": true,
 			"description": "Add support for Google Rich Cards to articles",
 			"public": true
-		},
-		"wgGoogleRichCardsAnnotateEvents": {
-			"value": false,
-			"description": "Add support for Google Rich Cards to events",
-			"public": true
-		},
-		"wgGoogleRichCardsAnnotateWebSite": {
-			"value": false,
-			"description": "Add support for Google Rich Cards to website",
-			"public": true
 		}
 	},
 	"Hooks": {
-		"BeforePageDisplay": "MediaWiki\\Extension\\GoogleRichCards\\Hooks::onBeforePageDisplay",
-		"ParserFirstCallInit": "MediaWiki\\Extension\\GoogleRichCards\\Hooks::onParserFirstCallInit"
+		"BeforePageDisplay": "MediaWiki\\Extension\\GoogleRichCards\\Hooks::onBeforePageDisplay"
 	},
 	"manifest_version": 2
 }

@@ -219,6 +219,8 @@ class Article {
             'description' => $this->title->getText(),
         ];
 
+        wfDebugLog( 'GoogleRichCards', 'Injecting json' . $this->title->getText() );
+
         // Inject JSON-LD into <head>
         $out->addHeadItem(
             'GoogleRichCardsArticle',

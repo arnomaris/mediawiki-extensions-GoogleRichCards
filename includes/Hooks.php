@@ -40,15 +40,15 @@ class Hooks {
           $article->render( $out );
       }
 
-      if ( $config->get( 'wgGoogleRichCardsAnnotateEvents' ) ) {
-          $event = Event::getInstance();
-          $event->render( $out );
-      }
+    //   if ( $config->get( 'wgGoogleRichCardsAnnotateEvents' ) ) {
+    //       $event = Event::getInstance();
+    //       $event->render( $out );
+    //   }
 
-      if ( $config->get( 'wgGoogleRichCardsAnnotateWebSite' ) ) {
-          $website = WebSite::getInstance();
-          $website->render( $out );
-      }
+    //   if ( $config->get( 'wgGoogleRichCardsAnnotateWebSite' ) ) {
+    //       $website = WebSite::getInstance();
+    //       $website->render( $out );
+    //   }
 
       return true;
   }
@@ -62,15 +62,15 @@ class Hooks {
    * @param Parser $parser The global Parser object.
    * @return void
    */
-  public static function onParserFirstCallInit( Parser $parser ): void {
-      $config = MediaWikiServices::getInstance()->getMainConfig();
+//   public static function onParserFirstCallInit( Parser $parser ): void {
+//       $config = MediaWikiServices::getInstance()->getMainConfig();
 
-      if ( $config->get( 'wgGoogleRichCardsAnnotateEvents' ) ) {
-          $event = Event::getInstance();
+//       if ( $config->get( 'wgGoogleRichCardsAnnotateEvents' ) ) {
+//           $event = Event::getInstance();
 
-          // Register a <event> parser hook which calls $event->parse()
-          $parser->setHook( 'event', [ $event, 'parse' ] );
-      }
-  }
-}
+//           // Register a <event> parser hook which calls $event->parse()
+//           $parser->setHook( 'event', [ $event, 'parse' ] );
+//       }
+//   }
+// }
 
