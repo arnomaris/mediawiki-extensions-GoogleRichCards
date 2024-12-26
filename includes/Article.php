@@ -186,7 +186,7 @@ class Article {
         // Build an array describing the article in Schema.org/JSON-LD
         $article = [
             '@context'         => 'http://schema.org',
-            '@type'            => 'Article',
+            '@type'            => 'NewsArticle',
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
                 '@id'   => $this->title->getFullURL(),
@@ -196,7 +196,6 @@ class Article {
                 'name'  => $authorName,
             ],
             'headline'         => $this->title->getText(),
-            'dateCreated'      => $createdTimestamp,
             'datePublished'    => $createdTimestamp,
             'dateModified'     => $modifiedTimestamp,
             'discussionUrl'    => $this->title->getTalkPage()
