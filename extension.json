@@ -2,7 +2,8 @@
 	"name": "GoogleRichCards",
 	"version": "0.1",
 	"author": [
-		"Igor Shishkin"
+		"Igor Shishkin",
+		"Drolerina"
 	],
 	"url": "https://github.com/teran/mediawiki-GoogleRichCards",
 	"description": "Google Rich Cards extension",
@@ -12,11 +13,8 @@
 	"requires": {
 		"MediaWiki": ">= 1.29.0"
 	},
-	"AutoloadClasses": {
-		"MediaWiki\\Extension\\GoogleRichCards\\Hooks": "Hooks.php",
-		"MediaWiki\\Extension\\GoogleRichCards\\Article": "Article.php",
-		"MediaWiki\\Extension\\GoogleRichCards\\Event": "Event.php",
-		"MediaWiki\\Extension\\GoogleRichCards\\WebSite": "WebSite.php"
+	"AutoLoadNamespaces": {
+		"MediaWiki\\Extension\\GoogleRichCards\\": "includes/"
 	},
 	"Hooks": {
 		"BeforePageDisplay": "MediaWiki\\Extension\\GoogleRichCards\\Hooks::onBeforePageDisplay",
