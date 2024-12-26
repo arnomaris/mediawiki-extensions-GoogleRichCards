@@ -1,80 +1,24 @@
-# mediawiki-GoogleRichCards
-MediaWiki extension to generate Google Rich Cards metadata for article pages
+# GoogleRichCards</h1>
 
-mediawiki.org extension page: https://www.mediawiki.org/wiki/Extension:GoogleRichCards
+**GoogleRichCards** is an MediaWiki extension to generate Google Rich Cards metadata for article pages. It is forked from [Extension:GoogleRichCards](https://www.mediawiki.org/wiki/Extension:GoogleRichCards)
 
-# Features
+## Features
 The extension adds Google Rich Card JSON-LD metadata to each "content page" of your MediaWiki installation.
 Currently it supports the following types:
 
- * Article (status: stable)
- * WebSite (status: beta)
- * Event (status: alpha)
+ * Article
 
-# Installation
+## Requirements
+* [MediaWiki](https://www.mediawiki.org/) 1.39 or later
 
-### Download code
+## Installation
+1. Download and place file(s) in a directory called `GoogleRichCards` in your `extensions/` folder.
+```console
+git clone https://github.com/arnomaris/mediawiki-extensions-GoogleRichCards.git GoogleRichCards
 ```
-git clone https://github.com/teran/mediawiki-GoogleRichCards.git <mediawiki path>/extensions/GoogleRichCards
-```
-
-### LocalSettings.php
-```
-// Load extension
+2. Add the following code at the bottom of your LocalSettings.php file:
+```php
 wfLoadExtension('GoogleRichCards');
-
-// Enable annotations for articles
-$wgGoogleRichCardsAnnotateArticles = true;
-
-// Enable annotations for events
-$wgGoogleRichCardsAnnotateEvents = true;
-
-// Enable WebSite annotations
-$wgGoogleRichCardsAnnotateWebSite = true;
 ```
+3. **✔️Done** - Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
 
-### Template:Event
-```
-== Event ==
-=== {{{name}}}
-
-{{{description}}}
-
-
-Date: {{{startDate}}}
-
-Place: {{{place}}}
-
-Address: {{{streetAddress}}}
-
-Performer: {{{performer}}}
-
-
-<event name="{{{name}}}" startDate="{{{startDate}}}" endDate="{{{endDate}}}" place="{{{place}}}" description="{{{description}}}" postalCode="{{{postalCode}}}" locality="{{{locality}}}" region="{{{region}}}" country="{{{country}}}" performer="{{{performer}}}" streetaddress="{{{streetAddress}}}" offer="{{{offer}}}" offerURL="{{{offerURL}}}" offerPrice="{{{offerPrice}}}" offerCurrency="{{{offerCurrency}}}" offerAvailability="{{{offerAvailability}}}" validFrom="{{{validFrom}}}" image="{{{image}}} />
-```
-
-Please note, you're free to update this template in order to setup events publishing in your own flavour
-
-### Usage of Event template
-
-```
-{{Event
-|name=Track day
-|startDate=2018-06-01T10:00+03:00
-|endDate=2018-06-01T20:00+03:00
-|place=Moscow Raceway
-|description=First track day in June
-|postalCode=000000
-|locality=Moscow district
-|region=District of Volokolamsk
-|streetAddress=95th km of Novorizhskoe highway (М9)
-|country=RU
-|offerAvailability=InStock
-|performer=Some awesome person
-|offerPrice=5
-|offerCurrency=USD
-|offerURL=http://example.com/test-event
-|image=http://example.com/logo.png
-|validFrom=2018-06-01T10:00+03:00
-}}
-```
